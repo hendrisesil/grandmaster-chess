@@ -14,23 +14,23 @@ let playerColor = 'white';
 let aiColor = 'black';
 let gameActive = true;
 
-// Piece Assets (Wikimedia Commons)
+// Piece Assets - menggunakan lichess CDN (lebih stabil & tidak ada CORS)
 const pieces = {
     'w': {
-        'p': 'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg',
-        'n': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg',
-        'b': 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg',
-        'r': 'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg',
-        'q': 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
-        'k': 'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg'
+        'p': 'https://lichess1.org/assets/piece/cburnett/wP.svg',
+        'n': 'https://lichess1.org/assets/piece/cburnett/wN.svg',
+        'b': 'https://lichess1.org/assets/piece/cburnett/wB.svg',
+        'r': 'https://lichess1.org/assets/piece/cburnett/wR.svg',
+        'q': 'https://lichess1.org/assets/piece/cburnett/wQ.svg',
+        'k': 'https://lichess1.org/assets/piece/cburnett/wK.svg'
     },
     'b': {
-        'p': 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
-        'n': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
-        'b': 'https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg',
-        'r': 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
-        'q': 'https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg',
-        'k': 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg'
+        'p': 'https://lichess1.org/assets/piece/cburnett/bP.svg',
+        'n': 'https://lichess1.org/assets/piece/cburnett/bN.svg',
+        'b': 'https://lichess1.org/assets/piece/cburnett/bB.svg',
+        'r': 'https://lichess1.org/assets/piece/cburnett/bR.svg',
+        'q': 'https://lichess1.org/assets/piece/cburnett/bQ.svg',
+        'k': 'https://lichess1.org/assets/piece/cburnett/bK.svg'
     }
 };
 
@@ -168,7 +168,7 @@ function renderBoard() {
 
         square.addEventListener('dragover', handleDragOver);
         square.addEventListener('drop', handleDrop);
-        square.addEventListener('click', handleSquareClick); // For click-to-move fallback
+        square.addEventListener('click', handleSquareClick);
 
         boardElement.appendChild(square);
     }
@@ -182,7 +182,6 @@ function handleDragStart(e) {
     e.dataTransfer.setData('text/plain', sourceSquare);
     setTimeout(() => draggedPiece.classList.add('dragging'), 0);
 
-    // Show hints
     showHints(sourceSquare);
 }
 
@@ -214,10 +213,8 @@ function handleSquareClick(e) {
     const piece = game.get(squareName);
 
     if (selectedSquare) {
-        // Try to move
         const move = attemptMove(selectedSquare, squareName);
         if (!move) {
-            // If invalid move, but clicked on own piece, select that instead
             if (piece && piece.color === playerColor.charAt(0)) {
                 removeHints();
                 selectedSquare = squareName;
@@ -260,7 +257,7 @@ function attemptMove(from, to) {
     const move = game.move({
         from: from,
         to: to,
-        promotion: 'q' // Always promote to queen for simplicity
+        promotion: 'q'
     });
 
     if (move) {
@@ -301,25 +298,20 @@ function checkGameOver() {
 }
 
 // --- AI Logic ---
-
 function makeAIMove() {
     if (!gameActive) return;
 
     const difficulty = parseInt(difficultySelect.value);
 
-    // Update status to show thinking
     statusElement.innerText = "AI is thinking...";
 
-    // Use setTimeout to allow UI to update before heavy calculation
     setTimeout(() => {
         let move;
         if (difficulty === 0) {
-            // Easy: Random
             const moves = game.moves();
             move = moves[Math.floor(Math.random() * moves.length)];
             game.move(move);
         } else {
-            // Medium/Hard: Minimax
             const depth = difficulty === 1 ? 2 : 3;
             const isMaximizing = aiColor === 'white';
             const bestMove = minimaxRoot(depth, game, isMaximizing);
@@ -434,17 +426,14 @@ function minimax(depth, game, alpha, beta, isMaximisingPlayer) {
 // --- Event Listeners ---
 newGameBtn.addEventListener('click', initGame);
 undoBtn.addEventListener('click', () => {
-    game.undo(); // Undo AI
-    game.undo(); // Undo Player
+    game.undo();
+    game.undo();
     renderBoard();
     updateStatus();
     gameActive = true;
 });
 
-difficultySelect.addEventListener('change', () => {
-    // Optional: Restart game or just change difficulty for next move
-});
-
+difficultySelect.addEventListener('change', () => {});
 orientationSelect.addEventListener('change', initGame);
 
 // Start
